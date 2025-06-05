@@ -1,0 +1,4 @@
+beamwidth       "--beamwidth "        i  (1, 10)
+mu              "--mu "               r  (1.0, 3.5)
+samplerate      "--sample-rate "      i  (0, 100)
+#samples         "-S "                 i  (1, 5)

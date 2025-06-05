@@ -1,0 +1,76 @@
+
+# /
+*.aux
+*.bak
+*.bbl
+*.blg
+*.log
+*.o
+*.out
+*.rel
+*.synctex.gz
+*.toc
+*~
+.Rhistory
+TAGS
+docs/
+/VERSION
+/git_version
+/irace-Ex.R
+/TAGS
+/*.synctex*
+/*.bak
+docs/
+/parameters.txt
+/revdep
+/svn_version
+/tune-conf
+
+# /GenericWrapper4AC/
+/GenericWrapper4AC/.git
+/GenericWrapper4AC/build
+/GenericWrapper4AC/.gitattributes
+/GenericWrapper4AC/GenericWrapper4AC.egg-info
+
+# /GenericWrapper4AC/test/
+/GenericWrapper4AC/test/test_binaries
+
+# /R/
+/R/version.R
+
+# /doc/
+/doc/auto
+/doc/.svnignore
+/doc/*.bib
+/doc/documentation.pdf
+
+# /examples/vignette-example/
+/examples/vignette-example/examples.Rdata
+/examples/vignette-example/irace-output.Rdata
+/examples/vignette-example/*.stderr
+/examples/vignette-example/*.stdout
+
+
+# /src/iracebin/
+/src/iracebin/irace
+/src/iracebin/ablation
+/src/iracebin/irace2pyimp
+/src/dummy/target-runner-dummy
+
+# /vignettes/
+/vignettes/*.out
+/vignettes/*.toc
+/vignettes/*.bbl
+/vignettes/*.fls
+/vignettes/*.synctex*
+/vignettes/section/irace-options.tex
+/vignettes/irace-package.tex
+/vignettes/irace-package.pdf
+/vignettes/irace-package.R
+/vignettes/figure
+/vignettes/_region_.*
+
+_snaps
+
+.idea
+*.Rproj

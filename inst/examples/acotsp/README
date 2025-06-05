@@ -1,0 +1,20 @@
+Example configuration scenario: ACOTSP
+======================================
+
+This example scenario shows how irace can be used to tune
+an optimization algorithm.
+
+ACOTSP is a software that implements various Ant Colony algorithms
+for the symmetric Traveling Salesman Problem.
+
+We will use the version provided here:
+
+https://github.com/MLopez-Ibanez/ACOTSPQAP/archive/refs/heads/master.zip
+
+TSP instances and more information is available at:
+
+https://iridia.ulb.ac.be/supp/IridiaSupp2016-003/index.html
+
+You should use the instances from this file:
+
+https://iridia.ulb.ac.be/supp/IridiaSupp2016-003/scenarios/acotsp/instances.tar.gz

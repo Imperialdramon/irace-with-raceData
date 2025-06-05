@@ -1,0 +1,14 @@
+###################################################### -*- mode: r -*- #####
+## Scenario setup for Iterated Race (irace).
+############################################################################
+logFile = "./irace-acotsp.Rdata"
+trainInstancesDir = "./acotsp/instances/"
+trainInstancesFile = "./tsp-2000-50-training.txt"
+maxExperiments = 1000
+testInstancesDir = "./acotsp/instances/"
+testInstancesFile = "./tsp-2000-50-testing.txt"
+configurationsFile = "default.txt"
+testNbElites = 5
+testIterationElites = 1
+seed = 687542627L
+############################################################################
