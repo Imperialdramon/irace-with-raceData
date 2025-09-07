@@ -71,6 +71,7 @@ updateModel <- function(parameters, eliteConfigurations, oldModel,
     # Normalize probabilities.
     p <- p / sum(p)
     # Prevent probabilities from growing too much.
+    # PABLO TODO: COMENTAR PARA DESHABILITAR LA "APLANADORA"
     p <- pmin.int(p, prob_max)
     p <- p / sum(p)
     p / sum(p)

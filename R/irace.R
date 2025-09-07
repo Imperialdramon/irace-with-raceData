@@ -1173,6 +1173,10 @@ irace_run <- function(scenario)
     # Merge new results.
     iraceResults$experiments <- merge_matrix(iraceResults$experiments, raceResults$experiments)
 
+    # PABLO: Guardar los resultados de la carrera
+    iraceResults$rankingByRace[[iteration]] <- raceResults$rankingByRace
+    iraceResults$rankingFinal[[iteration]] <- raceResults$rankingFinal
+
     # Update remaining budget.
     experimentsUsed <- experimentsUsed + raceResults$experimentsUsed
     if (scenario$maxTime > 0L) {

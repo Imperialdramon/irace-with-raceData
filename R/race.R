@@ -1136,6 +1136,16 @@ elitist_race <- function(race_state, maxExp,
       best <- prev_which_alive[which.min(race_ranks)]
     }
 
+    # PABLO: Guardar el ranking de esta iteración en race_state
+    if (is.null(race_state$rankingByRace)) {
+      race_state$rankingByRace <- list()
+    }
+    # PABLO: Guardamos el ranking con los IDs de las configuraciones vivas en esta iteración
+    race_state$rankingByRace[[length(race_state$rankingByRace) + 1]] <- data.frame(
+      configuration = configurations[[".ID."]][prev_which_alive],
+      rank = race_ranks
+    )
+
     irace_assert(best == prev_which_alive[order(race_ranks)][1L])
     irace_assert(length(race_ranks) == length(prev_which_alive))
 
@@ -1215,6 +1225,13 @@ elitist_race <- function(race_state, maxExp,
   irace_assert(all(configurations[[".ID."]] %not_in% rejected_ids)) # No rejected is alive.
   # Assign the proper ranks in the configurations data.frame.
   configurations[[".RANK."]] <- race_ranks
+
+  # PABLO: Guardar el ranking final de todas las configuraciones vivas
+  race_state$rankingFinal <- data.frame(
+    configuration = configurations[[".ID."]],
+    rank = configurations[[".RANK."]]
+  )
+
   # Now we can sort the data.frame by the rank.
   configurations <- configurations[order(configurations[[".RANK."]]), , drop=FALSE]
   if (scenario$debugLevel >= 3L) {
@@ -1237,5 +1254,8 @@ elitist_race <- function(race_state, maxExp,
   list(experiments = Results,
        experiment_log = local_experiment_log,
        experimentsUsed = experiments_used,
-       configurations = configurations)
+       configurations = configurations,
+       rankingByRace = race_state$rankingByRace,
+       rankingFinal = race_state$rankingFinal
+       )
 }
