@@ -1136,7 +1136,8 @@ irace_run <- function(scenario)
       configurations_print(raceConfigurations, metadata = TRUE)
     }
 
-    # Save the configurations used in this iteration.
+    # PABLO: Save the configurations used in this iteration.
+    # Es posible que se tenga que agregar una iteración más
     iraceResults$raceData[[indexIteration]] <- raceConfigurations
 
     # Get data from previous races.
@@ -1174,8 +1175,8 @@ irace_run <- function(scenario)
     iraceResults$experiments <- merge_matrix(iraceResults$experiments, raceResults$experiments)
 
     # PABLO: Guardar los resultados de la carrera
-    iraceResults$rankingByRace[[indexIteration]] <- raceResults$rankingByRace
-    iraceResults$rankingFinal[[indexIteration]] <- raceResults$rankingFinal
+    iraceResults$rankingByRace[[indexIteration]] <- raceResults$ranking_by_race
+    iraceResults$rankingFinal[[indexIteration]] <- raceResults$ranking_final_race
 
     # Update remaining budget.
     experimentsUsed <- experimentsUsed + raceResults$experimentsUsed
@@ -1222,12 +1223,13 @@ irace_run <- function(scenario)
     }
     indexIteration <- indexIteration + 1L
   } # end of repeat
-
-  # PABLO: Calcular el ranking total final de todas las configuraciones evaluadas
-  if (!is.null(iraceResults$experiments) && nrow(iraceResults$experiments) > 0L) {
+  # PABLO: Calcular el ranking total final de todas las configuraciones
+  # evaluadas. Modificar porque no guarda bien.
+  if (!is.null(iraceResults$experiments) &&
+      nrow(iraceResults$experiments) > 0L) {
     # PABLO: Calcula el desempeño promedio de cada configuración
     mean_performance <- rowMeans(iraceResults$experiments, na.rm = TRUE)
-    iraceResults$rankingTotal <- data.frame(
+    iraceResults$ranking_total <- data.frame(
       configuration = rownames(iraceResults$experiments),
       mean_performance = mean_performance,
       rank = rank(mean_performance, ties.method = "min")

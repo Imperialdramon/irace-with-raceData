@@ -816,6 +816,9 @@ elitist_race <- function(race_state, maxExp,
   which_alive <- which(alive)
   nb_alive    <- length(which_alive)
 
+  # PABLO: Store the ranking of configurations at each step
+  ranking_by_race <- list()
+
   for (current_task in seq_len(nb_tasks)) {
     which_exe   <- which_alive
     if (elitist && any(is_elite > 0L)) {
@@ -1137,7 +1140,8 @@ elitist_race <- function(race_state, maxExp,
     }
 
     # PABLO: Guardamos el ranking con los IDs de las configuraciones vivas en esta iteración
-    race_state$rankingByRace[[length(race_state$rankingByRace) + 1]] <- data.frame(
+    #race_state$rankingByRace[[length(race_state$rankingByRace) + 1]] <- data.frame(
+    ranking_by_race[[current_task]] <- data.frame(
       configuration = configurations[[".ID."]][prev_which_alive],
       rank = race_ranks
     )
@@ -1222,10 +1226,13 @@ elitist_race <- function(race_state, maxExp,
   # Assign the proper ranks in the configurations data.frame.
   configurations[[".RANK."]] <- race_ranks
 
-  # PABLO: Guardar el ranking final de todas las configuraciones vivas
-  race_state$rankingFinal <- data.frame(
-    configuration = configurations[[".ID."]],
-    rank = configurations[[".RANK."]]
+  # PABLO: Guardar el ranking final de todas las configuraciones evaluadas en la race
+  # El ranking se calcula sobre todas las ejecuciones realizadas (todas las filas de Results)
+  all_ids <- colnames(Results)
+  final_ranks <- overall_ranks(Results, test = stat_test)
+  ranking_final_race <- data.frame(
+    configuration = as.integer(all_ids),
+    rank = final_ranks
   )
 
   # Now we can sort the data.frame by the rank.
@@ -1251,7 +1258,7 @@ elitist_race <- function(race_state, maxExp,
        experiment_log = local_experiment_log,
        experimentsUsed = experiments_used,
        configurations = configurations,
-       rankingByRace = race_state$rankingByRace,
-       rankingFinal = race_state$rankingFinal
+       ranking_by_race = ranking_by_race,
+       ranking_final_race = ranking_final_race
        )
 }
