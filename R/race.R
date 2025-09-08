@@ -608,6 +608,9 @@ elitist_race <- function(race_state, maxExp,
                  firstTest = scenario$firstTest)
 {
   blockSize <- scenario$blockSize
+  # PABLO: Inicializar los campos para evitar error de entorno bloqueado
+  if (is.null(race_state$rankingByRace)) race_state$rankingByRace <- list()
+  if (is.null(race_state$rankingFinal)) race_state$rankingFinal <- NULL
   conf.level <- scenario$confidence
   firstTest <- blockSize * firstTest
   eachTest <- blockSize * scenario$eachTest
@@ -1136,10 +1139,6 @@ elitist_race <- function(race_state, maxExp,
       best <- prev_which_alive[which.min(race_ranks)]
     }
 
-    # PABLO: Guardar el ranking de esta iteración en race_state
-    if (is.null(race_state$rankingByRace)) {
-      race_state$rankingByRace <- list()
-    }
     # PABLO: Guardamos el ranking con los IDs de las configuraciones vivas en esta iteración
     race_state$rankingByRace[[length(race_state$rankingByRace) + 1]] <- data.frame(
       configuration = configurations[[".ID."]][prev_which_alive],
