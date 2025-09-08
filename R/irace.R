@@ -1222,4 +1222,15 @@ irace_run <- function(scenario)
     }
     indexIteration <- indexIteration + 1L
   } # end of repeat
+
+  # PABLO: Calcular el ranking total final de todas las configuraciones evaluadas
+  if (!is.null(iraceResults$experiments) && nrow(iraceResults$experiments) > 0L) {
+    # PABLO: Calcula el desempeño promedio de cada configuración
+    mean_performance <- rowMeans(iraceResults$experiments, na.rm = TRUE)
+    iraceResults$rankingTotal <- data.frame(
+      configuration = rownames(iraceResults$experiments),
+      mean_performance = mean_performance,
+      rank = rank(mean_performance, ties.method = "min")
+    )
+  }
 }
