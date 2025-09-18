@@ -1140,7 +1140,6 @@ elitist_race <- function(race_state, maxExp,
     }
 
     # PABLO: Guardamos el ranking con los IDs de las configuraciones vivas en esta iteración
-    #race_state$rankingByRace[[length(race_state$rankingByRace) + 1]] <- data.frame(
     ranking_by_race[[current_task]] <- data.frame(
       configuration = configurations[[".ID."]][prev_which_alive],
       rank = race_ranks

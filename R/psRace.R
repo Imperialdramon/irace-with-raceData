@@ -42,6 +42,9 @@
 psRace <- function(iraceResults, max_experiments, conf_ids = NULL, iteration_elites = FALSE,
                    psrace_logFile = NULL)
 {
+  # PABLO: Revisar para guardar
+  # 1. Completar ejecuciones de configuraciones
+  # 2. Agregar ejecuciones si es que se puede
   irace_note("Starting post-selection:\n")
   if (missing(iraceResults)) stop("argument 'iraceResults' is missing.")
   iraceResults <- read_logfile(iraceResults)
@@ -247,6 +250,10 @@ psRace <- function(iraceResults, max_experiments, conf_ids = NULL, iteration_eli
     "\n# Available experiments: ", max_experiments,
     "\n# minSurvival: 1\n")
 
+  # PABLO: Acá ocurre la etapa final donde no agrega nuevas instancias
+  # sino que completa las ejecuciones de las configuraciones elite.
+  # Importante: Esto puede mejorar el ranking de algunas configuraciones.
+
   # We do not want to stop because of this limit.
   scenario$elitistLimit <- 0L
   # FIXME: elitist_race should not require setting this, but it currently does.
@@ -260,6 +267,9 @@ psRace <- function(iraceResults, max_experiments, conf_ids = NULL, iteration_eli
     elitist_new_instances = 0L,
     # FIXME: This should be nrow(elite_data) + 1L if we have budget to evaluate on new instances.
     firstTest = nrow(elite_data) / scenario$blockSize)
+
+  # PABLO: Guardar ranking por cada test estadístico realizado
+  rankingByRace <- raceResults$ranking_by_race
 
   elite_configurations <- extractElites(raceResults$configurations,
     nbElites = race_state$minSurvival, debugLevel = scenario$debugLevel)
@@ -293,5 +303,14 @@ psRace <- function(iraceResults, max_experiments, conf_ids = NULL, iteration_eli
       elites = elite_configurations[[".ID."]])
     save_irace_logfile(iraceResults, logfile = scenario$logFile)
   }
-  elite_configurations
+
+  # PABLO: Devolver los datos de la última iteración de psRace
+  return(list(
+    configurations = elite_configurations,
+    rankingByRace = rankingByRace,
+    rankingFinal = data.frame(
+      configuration = elite_configurations[[".ID."]],
+      rank = elite_configurations[[".RANK."]]
+    )
+  ))
 }

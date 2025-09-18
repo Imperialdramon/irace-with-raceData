@@ -656,7 +656,7 @@ irace_run <- function(scenario)
     }
   }
   # FIXME: use this from psrace?
-  irace_finish <- function(iraceResults, scenario, reason) {
+  irace_finish <- function(iraceResults, scenario, reason, indexIteration) {
     elapsed <- race_state$time_elapsed()
     if (!scenario$quiet)
       cat("# Total CPU user time: ", elapsed["user"], ", CPU sys time: ", elapsed["system"],
@@ -664,12 +664,18 @@ irace_run <- function(scenario)
     # FIXME: Do we need to clone?
     race_state$completed <- reason
     iraceResults$state <- race_state
-    save_irace_logfile(iraceResults, logfile = scenario$logFile)
     # FIXME: Handle scenario$maxTime > 0
-    if (scenario$postselection && scenario$maxTime == 0 && floor(remainingBudget / max(scenario$blockSize, scenario$eachTest)) > 1L)
-      psRace(iraceResults, max_experiments = remainingBudget, iteration_elites = TRUE)
-    else
-      elite_configurations
+    if (scenario$postselection && scenario$maxTime == 0 && floor(remainingBudget / max(scenario$blockSize, scenario$eachTest)) > 1L) {
+      psrace_result <- psRace(iraceResults, max_experiments = remainingBudget, iteration_elites = TRUE)
+      # PABLO: Guardar los datos de la última iteración de psRace en iraceResults
+      iraceResults$raceData[[indexIteration + 1]] <- psrace_result$configurations
+      iraceResults$rankingByRace[[indexIteration + 1]] <- psrace_result$rankingByRace
+      iraceResults$rankingFinal[[indexIteration + 1]] <- psrace_result$rankingFinal
+      elite_configurations <- psrace_result$configurations
+    }
+    # PABLO: Guardar los datos de iraceResults en el logfile
+    save_irace_logfile(iraceResults, logfile = scenario$logFile)
+    elite_configurations
   }
 
   debugLevel <- scenario$debugLevel
@@ -690,7 +696,13 @@ irace_run <- function(scenario)
     irace_version = irace_version,
     iterationElites = c(),
     allElites = list(),
-    experiments = matrix(nrow = 0L, ncol = 0L))
+    experiments = matrix(nrow = 0L, ncol = 0L),
+    # PABLO: Datos para analisis de rendimiento
+    # siempre la posición [[final]] tiene la info de la iteración de élites
+    raceData = list(),
+    rankingByRace = list(),
+    rankingFinal = list()
+  )
   model <- NULL
   nbConfigurations <- 0L
   elite_configurations <- data.frame(stringsAsFactors=FALSE)
@@ -904,11 +916,11 @@ irace_run <- function(scenario)
 
     if (remainingBudget <= 0) {
       catInfo("Stopped because budget is exhausted")
-      return(irace_finish(iraceResults, scenario, reason = "Budget exhausted"))
+      return(irace_finish(iraceResults, scenario, reason = "Budget exhausted", indexIteration))
     }
     if (scenario$maxTime > 0 && timeUsed >= scenario$maxTime) {
       catInfo("Stopped because time budget is exhausted")
-      return(irace_finish(iraceResults, scenario, reason = "Time budget exhausted"))
+      return(irace_finish(iraceResults, scenario, reason = "Time budget exhausted", indexIteration))
     }
 
     if (indexIteration > nbIterations) {
@@ -917,7 +929,7 @@ irace_run <- function(scenario)
       } else {
         if (debugLevel >= 1L)
           catInfo("Limit of iterations reached", verbose = FALSE)
-        return(irace_finish(iraceResults, scenario, reason = "Limit of iterations reached"))
+        return(irace_finish(iraceResults, scenario, reason = "Limit of iterations reached", indexIteration))
       }
     }
     # Compute the current budget (nb of experiments for this iteration),
@@ -979,7 +991,7 @@ irace_run <- function(scenario)
       } else {
         catInfo("Stopped because ",
           "there is not enough budget to enforce the value of nbConfigurations.")
-        return(irace_finish(iraceResults, scenario, reason = "Not enough budget to enforce the value of nbConfigurations"))
+        return(irace_finish(iraceResults, scenario, reason = "Not enough budget to enforce the value of nbConfigurations", indexIteration))
       }
     }
 
@@ -988,7 +1000,7 @@ irace_run <- function(scenario)
       catInfo("Stopped because there is not enough budget left to race more than ",
               "the minimum (", minSurvival,").\n",
               "# You may either increase the budget or set 'minNbSurvival' to a lower value.")
-      return(irace_finish(iraceResults, scenario, reason = "Not enough budget to race more than the minimum configurations"))
+      return(irace_finish(iraceResults, scenario, reason = "Not enough budget to race more than the minimum configurations", indexIteration))
     }
 
 
@@ -1006,7 +1018,7 @@ irace_run <- function(scenario)
       catInfo("Stopped because ",
               "there is not enough budget left to race newly sampled configurations.")
       #(number of elites  + 1) * (mu + min(5, indexIteration)) > remainingBudget"
-      return(irace_finish(iraceResults, scenario, reason = "Not enough budget left to race newly sampled configurations"))
+      return(irace_finish(iraceResults, scenario, reason = "Not enough budget left to race newly sampled configurations", indexIteration))
     }
 
     if (scenario$elitist) {
@@ -1016,11 +1028,11 @@ irace_run <- function(scenario)
           + nrow(elite_configurations) * min(race_state$elitist_new_instances, scenario$mu)
           > currentBudget) {
         catInfo("Stopped because there is not enough budget left to race all configurations up to the first test (or mu).")
-        return(irace_finish(iraceResults, scenario, reason = "Not enough budget to race all configurations up to the first test (or mu)"))
+        return(irace_finish(iraceResults, scenario, reason = "Not enough budget to race all configurations up to the first test (or mu)", indexIteration))
       }
     } else if (nbConfigurations * scenario$mu > currentBudget) {
       catInfo("Stopped because there is not enough budget left to race all configurations up to the first test (or mu).")
-      return(irace_finish(iraceResults, scenario, reason = "Not enough budget to race all configurations up to the first test (or mu)"))
+      return(irace_finish(iraceResults, scenario, reason = "Not enough budget to race all configurations up to the first test (or mu)", indexIteration))
     }
 
     catInfo("Iteration ", indexIteration, " of ", nbIterations, "\n",
@@ -1223,16 +1235,4 @@ irace_run <- function(scenario)
     }
     indexIteration <- indexIteration + 1L
   } # end of repeat
-  # PABLO: Calcular el ranking total final de todas las configuraciones
-  # evaluadas. Modificar porque no guarda bien.
-  if (!is.null(iraceResults$experiments) &&
-      nrow(iraceResults$experiments) > 0L) {
-    # PABLO: Calcula el desempeño promedio de cada configuración
-    mean_performance <- rowMeans(iraceResults$experiments, na.rm = TRUE)
-    iraceResults$ranking_total <- data.frame(
-      configuration = rownames(iraceResults$experiments),
-      mean_performance = mean_performance,
-      rank = rank(mean_performance, ties.method = "min")
-    )
-  }
 }
