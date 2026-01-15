@@ -989,9 +989,9 @@ irace_run <- function(scenario)
         indexIteration <- indexIteration + 1L
         next
       } else {
-        catInfo("Stopped because ",
-          "there is not enough budget to enforce the value of nbConfigurations.")
-        return(irace_finish(iraceResults, scenario, reason = "Not enough budget to enforce the value of nbConfigurations", indexIteration))
+        #LESLIE: Este cambio debería evitar que se detenga el proceso
+        catInfo("There is not enough budget to enforce the value of nbConfigurations, returning to default behaviour nbConfigurations:",nbConfigurations,".")
+        #return(irace_finish(iraceResults, scenario, reason = "Not enough budget to enforce the value of nbConfigurations"))
       }
     }
 
